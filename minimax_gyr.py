@@ -1,7 +1,6 @@
-"""
+
 🐱 GATO VS RATÓN 🐭
-Versión simplificada con Minimax
-"""
+
 
 import random
 import copy
