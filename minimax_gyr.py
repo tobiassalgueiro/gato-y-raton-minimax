@@ -2,7 +2,7 @@ import random
 import copy
 import time
 
-# ─── TABLERO ────
+
 def crear_tablero(tamaño=8):
     return {
         "tamaño":      tamaño,
@@ -26,7 +26,7 @@ def generar_paredes(tamaño):
             paredes.append(pos)
     return paredes
 
-# ─── VISUALIZACIÓN ──────
+# visualización
 
 def mostrar(t):
     print(f"\nTurno {t['turno']}/{t['max_turnos']}")
@@ -42,7 +42,7 @@ def mostrar(t):
             else:                                            linea += "·  "
         print(linea)
 
-# ─── LÓGICA ──────
+# logica del juego
 
 def movimientos_validos(t, pos, es_gato):
     dirs = [[-1,0],[1,0],[0,-1],[0,1]]
@@ -67,34 +67,33 @@ def verificar_queso(t):
     if t["raton"] == t["queso"] and not t["tiene_queso"]:
         t["tiene_queso"] = True
 
-# ─── IA: EVALUACIÓN Y MINIMAX ───
+# ia, evaluacion minimax
 
 def evaluar(t):
     if t["gato"] == t["raton"]: return -1000
     if t["tiene_queso"]:        return  1000
     d_gr = distancia(t["gato"], t["raton"])
     d_rq = distancia(t["raton"], t["queso"])
-    # positivo = bueno para ratón / malo para gato
     return d_gr * 15 - d_rq * 10
 
 def minimax(t, prof, es_max, visitados_g=None, visitados_r=None):
     """
-    visitados_g / visitados_r: conjuntos de tuplas con posiciones
-    ya recorridas en esta rama del árbol.
-    Si un movimiento lleva a una posición ya visitada en la misma rama
-    se le aplica una penalización para que el algoritmo lo evite.
+    visitados_g / visitados_r: tuplas con posiciones
+    ya recorridas en esta rama del árbol
+    si un movimiento lleva a una posición ya visitada en la misma rama
+    se le aplica una penalización para que el algoritmo lo evite
     """
     if visitados_g is None: visitados_g = set()
     if visitados_r is None: visitados_r = set()
 
     if prof == 0 or terminado(t):
         ev = evaluar(t)
-        # Penalizar si la posición actual ya fue visitada en esta rama
-        if tuple(t["gato"])  in visitados_g: ev += 40   # malo para ratón → gato repite = sube puntuación desde perspectiva contraria
+        # penalizacion por repetir posiciones
+        if tuple(t["gato"])  in visitados_g: ev += 40   # malo para ratón si gato repite
         if tuple(t["raton"]) in visitados_r: ev -= 40
         return ev, None
 
-    if es_max:   # RATÓN maximiza
+    if es_max:   # raotn maximiza
         mejor = (float('-inf'), None)
         for mov in movimientos_validos(t, t["raton"], False):
             copia = copy.deepcopy(t)
@@ -107,7 +106,8 @@ def minimax(t, prof, es_max, visitados_g=None, visitados_r=None):
             ev += pen
             if ev > mejor[0]:
                 mejor = (ev, mov)
-    else:        # GATO minimiza
+
+    else:        # gato minimiza
         mejor = (float('inf'), None)
         for mov in movimientos_validos(t, t["gato"], True):
             copia = copy.deepcopy(t)
@@ -123,17 +123,17 @@ def minimax(t, prof, es_max, visitados_g=None, visitados_r=None):
 
     return mejor
 
-# ─── MOVIMIENTO ────
+# movimientos
 
 def mover_ia(t, prof, es_raton):
-    # Pasar el historial real como conjunto de visitados iniciales
+    # historias de mov para evitar ciclos etc
     vis_g = {tuple(p) for p in t["historial_g"]}
     vis_r = {tuple(p) for p in t["historial_r"]}
     _, mov = minimax(t, prof, es_raton, vis_g, vis_r)
     if not mov:
         return
     if es_raton:
-        t["historial_r"] = (t["historial_r"] + [t["raton"][:]])[-6:]
+        t["historial_r"] = (t["historial_r"] + [t["raton"][:]])[-6:] # guardamos solo las últimas 6 posiciones para evitar ciclos infi
         t["raton"] = mov
         print("🐭 Ratón se mueve")
     else:
@@ -173,7 +173,7 @@ def mover_jugador(t, es_raton):
     except Exception:
         print("❌ Entrada inválida")
 
-# ─── BUCLE PRINCIPAL ─────
+# bucle principal
 
 def turno(t, prof, jugador_es_raton=None):
     if jugador_es_raton is True: mover_jugador(t, True)
@@ -201,7 +201,7 @@ def jugar(prof=4, jugador_es_raton=None):
     mostrar(t)
     resultado(t)
 
-# ─── MENÚ ───
+# menu
 
 def menu():
     print("\n🐱  GATO VS RATÓN  🐭")
@@ -210,7 +210,7 @@ def menu():
     print("3. Tú (Gato) vs IA")
     print("4. Salir")
 
-    op = input("\nOpción: ").strip()
+    op = input("\nOpción: ").strip() 
 
     if op == "1":
         jugar()
