@@ -77,12 +77,6 @@ def evaluar(t):
     return d_gr * 15 - d_rq * 10
 
 def minimax(t, prof, es_max, visitados_g=None, visitados_r=None):
-    """
-    visitados_g / visitados_r: tuplas con posiciones
-    ya recorridas en esta rama del árbol
-    si un movimiento lleva a una posición ya visitada en la misma rama
-    se le aplica una penalización para que el algoritmo lo evite
-    """
     if visitados_g is None: visitados_g = set()
     if visitados_r is None: visitados_r = set()
 
